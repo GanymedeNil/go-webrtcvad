@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/cryptix/wav"
-	"github.com/maxhawkins/go-webrtcvad"
+	"github.com/GanymedeNil/go-webrtcvad"
 )
 
 func main() {
@@ -44,7 +44,7 @@ func main() {
 	if wavInfo.Channels != 1 {
 		log.Fatal("expected mono file")
 	}
-	if rate != 32000 {
+	if rate != 8000 {
 		log.Fatal("expected 32kHz file")
 	}
 
@@ -53,12 +53,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := vad.SetMode(2); err != nil {
+	if err := vad.SetMode(0); err != nil {
 		log.Fatal(err)
 	}
 
-	frame := make([]byte, 320*2)
-
+	frame := make([]byte, 160)
 	if ok := vad.ValidRateAndFrameLength(rate, len(frame)); !ok {
 		log.Fatal("invalid rate or frame length")
 	}

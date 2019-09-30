@@ -10,7 +10,6 @@
 #include "webrtc/common_audio/signal_processing/energy.c"
 #include "webrtc/common_audio/signal_processing/get_scaling_square.c"
 #include "webrtc/common_audio/signal_processing/min_max_operations.c"
-#include "webrtc/common_audio/signal_processing/real_fft.c"
 #include "webrtc/common_audio/signal_processing/resample_48khz.c"
 #include "webrtc/common_audio/signal_processing/resample_by_2_internal.c"
 #include "webrtc/common_audio/signal_processing/resample_fractional.c"
