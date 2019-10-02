@@ -4,13 +4,15 @@ A VAD classifies a piece of audio data as being voiced or unvoiced. It can be us
 
 The VAD that Google developed for the WebRTC project is reportedly one of the best available, being fast, modern and free.
 
+This project is an upgraded version of [maxhawkins/go-webrtcvad](https://github.com/maxhawkins/go-webrtcvad)
+
 Usage
 -----
 
 Go-get the package. You don't need to have webrtc installed.
 
 ```
-go get github.com/maxhawkins/go-webrtcvad
+go get github.com/GanyedeNil/go-webrtcvad
 ```
 
 Feed raw audio samples into the VAD:
