@@ -44,9 +44,9 @@ func main() {
 	if wavInfo.Channels != 1 {
 		log.Fatal("expected mono file")
 	}
-	//if rate != 8000 {
-	//	log.Fatal("expected 8kHz file")
-	//}
+	if rate != 16000 {
+		log.Fatal("expected 16kHz file")
+	}
 
 	vad, err := webrtcvad.New()
 	if err != nil {
