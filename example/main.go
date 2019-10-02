@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/cryptix/wav"
 	"github.com/GanymedeNil/go-webrtcvad"
+	"github.com/cryptix/wav"
 )
 
 func main() {
@@ -44,9 +44,9 @@ func main() {
 	if wavInfo.Channels != 1 {
 		log.Fatal("expected mono file")
 	}
-	if rate != 8000 {
-		log.Fatal("expected 32kHz file")
-	}
+	//if rate != 8000 {
+	//	log.Fatal("expected 8kHz file")
+	//}
 
 	vad, err := webrtcvad.New()
 	if err != nil {
@@ -57,17 +57,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	frame := make([]byte, 160)
+	frame := make([]byte, 320)
 	if ok := vad.ValidRateAndFrameLength(rate, len(frame)); !ok {
 		log.Fatal("invalid rate or frame length")
 	}
 
 	var isActive bool
 	var offset int
+	var splitTime time.Duration
 
+	var tmpbuffer []byte
 	report := func() {
 		t := time.Duration(offset) * time.Second / time.Duration(rate) / 2
-		fmt.Printf("isActive = %v, t = %v\n", isActive, t)
+		splitTime = t
+		//fmt.Printf("isActive = %v, t = %v\n", isActive, t)
 	}
 
 	for {
@@ -83,14 +86,53 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		if frameActive {
+			tmpbuffer = append(tmpbuffer, frame...)
+		}
 		if isActive != frameActive || offset == 0 {
 			isActive = frameActive
+			var tmpTime = splitTime
 			report()
+			if frameActive == false {
+				duration := splitTime - tmpTime
+				if duration < (time.Duration(500) * time.Millisecond) {
+					fmt.Printf("%v-----%v---%v----%v \n",
+						tmpTime, splitTime, duration,
+						time.Duration(len(tmpbuffer))*time.Second/time.Duration(rate)/2)
+					writeWave(tmpbuffer, tmpTime, splitTime)
+				}
+			}
+			if isActive == false {
+				tmpbuffer = []byte{}
+			}
 		}
 
 		offset += len(frame)
 	}
 
 	report()
+}
+
+func writeWave(buffer []byte, start, end time.Duration) {
+	filename := fmt.Sprintf("tmp/chunk-%v-%v.wav", start.Nanoseconds()/1e6, end.Nanoseconds()/1e6)
+	f, err := os.Create(filename)
+	defer f.Close()
+	if err != nil {
+		log.Println("create file err:", err)
+	}
+	meta := wav.File{
+		Channels:        1,
+		SampleRate:      16000,
+		SignificantBits: 16,
+	}
+
+	writer, err := meta.NewWriter(f)
+	_, err = writer.Write(buffer)
+	if err != nil {
+		log.Println(err)
+	}
+	err = writer.Close()
+	if err != nil {
+		log.Println(err)
+	}
 }
