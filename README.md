@@ -12,7 +12,7 @@ Usage
 Go-get the package. You don't need to have webrtc installed.
 
 ```
-go get github.com/GanyedeNil/go-webrtcvad
+go get github.com/GanymedeNil/go-webrtcvad
 ```
 
 Feed raw audio samples into the VAD:
