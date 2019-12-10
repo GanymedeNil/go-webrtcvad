@@ -53,7 +53,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := vad.SetMode(0); err != nil {
+	if err := vad.SetMode(2); err != nil {
 		log.Fatal(err)
 	}
 
@@ -64,8 +64,9 @@ func main() {
 
 	var isActive bool
 	var offset int
+	var duration time.Duration
 	var splitTime time.Duration
-
+	var st time.Duration = 0
 	var tmpbuffer []byte
 	report := func() {
 		t := time.Duration(offset) * time.Second / time.Duration(rate) / 2
@@ -86,26 +87,32 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if frameActive {
-			tmpbuffer = append(tmpbuffer, frame...)
-		}
+
+		tmpbuffer = append(tmpbuffer, frame...)
+
 		if isActive != frameActive || offset == 0 {
 			isActive = frameActive
 			var tmpTime = splitTime
-			report()
-			if frameActive == false {
-				duration := splitTime - tmpTime
-				if duration < (time.Duration(500) * time.Millisecond) {
-					fmt.Printf("%v-----%v---%v----%v \n",
-						tmpTime, splitTime, duration,
-						time.Duration(len(tmpbuffer))*time.Second/time.Duration(rate)/2)
-					writeWave(tmpbuffer, tmpTime, splitTime)
-				}
+			if st==0 {
+				st = splitTime
 			}
-			if isActive == false {
-				tmpbuffer = []byte{}
+			report()
+			if !frameActive {
+				duration += splitTime - tmpTime
+				if duration>(2*time.Second) {
+					fmt.Printf("st--%s,et--%s,du--%s\n",st,splitTime,time.Duration(len(tmpbuffer))*time.Second/time.Duration(rate)/2)
+					writeWave(tmpbuffer, st, splitTime)
+					fmt.Println("len--", len(tmpbuffer))
+					tmpbuffer = []byte{}
+					duration = 0
+					st = 0
+					fmt.Println("clear")
+				}
+
+
 			}
 		}
+
 
 		offset += len(frame)
 	}
